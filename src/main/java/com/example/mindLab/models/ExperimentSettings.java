@@ -20,6 +20,7 @@ public class ExperimentSettings implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Long id;
+    private String experiment;
     private String shape;
     private String experimentLength;
     private String blinkDelay;

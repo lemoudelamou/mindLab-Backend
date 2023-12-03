@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/settings/")
+@RequestMapping("/api/data/")
 public class ExperimentDataController {
 
     private final ExperimentDataService experimentDataService;
@@ -35,12 +35,16 @@ public class ExperimentDataController {
         return new ResponseEntity<>(experimentDataList, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{SettingsId}")
     public ResponseEntity<ExperimentData> getExperimentDataById(@PathVariable Long id) {
         Optional<ExperimentData> experimentData = experimentDataService.getExperimentDataById(id);
         return experimentData.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+
+
+
 
 
     @PostMapping("/{settingsId}/results")

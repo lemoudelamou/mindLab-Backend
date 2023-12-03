@@ -25,13 +25,23 @@ public class Patient implements Serializable {
     private String fullname;
     private LocalDate birthDate ;
     private String age ;
+    private String gender;
     private String strongHand;
     private boolean hasDiseases;
     private String diseases;
+    @Column(nullable = false, updatable = false)
+    private LocalDate expDate;
 
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ExperimentSettings> experimentSettingsList;
+
+
+    @PrePersist
+    public void prePersist() {
+        // Set expDate to the current date when a new Patient is created
+        expDate = LocalDate.now();
+    }
 
 }
