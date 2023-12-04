@@ -23,6 +23,8 @@ public class ExperimentDataService {
         return experimentDataRepository.findAll();
     }
 
+
+
     public Optional<ExperimentData> getExperimentDataById(Long id) {
         return experimentDataRepository.findById(id);
     }
@@ -38,4 +40,7 @@ public class ExperimentDataService {
     public void deleteExperimentData(Long id) {
         experimentDataRepository.deleteById(id);
     }
+
+
+
 }

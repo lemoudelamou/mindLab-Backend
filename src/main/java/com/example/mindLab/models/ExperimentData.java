@@ -23,7 +23,7 @@ public class ExperimentData implements Serializable {
     private Long id;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "experiment_data_times_id")
+    @JoinColumn(name = "experiment_data_id")
     private List<ReactionTimes> reactionTimes;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,6 +34,11 @@ public class ExperimentData implements Serializable {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "experimentData", orphanRemoval = true)
     @JsonIgnore
     private AverageReactionTimes averageReactionTime;
+
+
+    public AverageReactionTimes getAverageReactionTimes() {
+        return averageReactionTime;
+    }
 
     public void setAverageReactionTimes(AverageReactionTimes averageReactionTime) {
         if (this.averageReactionTime == null || !this.averageReactionTime.equals(averageReactionTime)) {

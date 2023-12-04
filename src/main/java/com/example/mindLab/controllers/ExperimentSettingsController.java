@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/patients/{patientId}/settings")  // Update the request mapping to include the patientId variable
+@RequestMapping("/api/patient/")  // Update the request mapping to include the patientId variable
 public class ExperimentSettingsController {
 
     private final ExperimentSettingsService experimentSettingsService;
@@ -43,7 +43,7 @@ public class ExperimentSettingsController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping
+    @PostMapping("/settings/{patientId}")
     public ResponseEntity<ExperimentSettings> addExperimentSettings(
             @PathVariable Long patientId,  // Include the patientId variable in the path
             @RequestBody ExperimentSettings experimentSettings) {

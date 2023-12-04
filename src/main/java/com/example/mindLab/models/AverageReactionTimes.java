@@ -20,10 +20,11 @@ public class AverageReactionTimes implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Double positive;
-    private Double negative;
+    private Double correct;
+    private Double incorrect;
 
     @OneToOne
+    @JsonIgnore
     @JoinColumn(name = "experiment_data_id")
     private ExperimentData experimentData;
 

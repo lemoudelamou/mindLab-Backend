@@ -1,6 +1,8 @@
 package com.example.mindLab.controllers;
 
+import com.example.mindLab.dto.ExperimentDetailsDTO;
 import com.example.mindLab.models.*;
+import com.example.mindLab.repositories.PatientRepository;
 import com.example.mindLab.services.ExperimentDataService;
 import com.example.mindLab.services.ExperimentSettingsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,27 +25,39 @@ public class ExperimentDataController {
         return experimentSettingsService.getExperimentSettingsById(experimentSettingsId).orElseThrow(() -> new RuntimeException("Patient not found"));
     }
 
+
+    private final PatientRepository patientRepository;
+
+
     @Autowired
-    public ExperimentDataController(ExperimentDataService experimentDataService, ExperimentSettingsService experimentSettingsService) {
+    public ExperimentDataController(ExperimentDataService experimentDataService, ExperimentSettingsService experimentSettingsService, PatientRepository patientRepository) {
         this.experimentDataService = experimentDataService;
         this.experimentSettingsService = experimentSettingsService;
+        this.patientRepository = patientRepository;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<ExperimentData>> getAllExperimentData() {
         List<ExperimentData> experimentDataList = experimentDataService.getAllExperimentData();
         return new ResponseEntity<>(experimentDataList, HttpStatus.OK);
     }
 
-    @GetMapping("/{SettingsId}")
-    public ResponseEntity<ExperimentData> getExperimentDataById(@PathVariable Long id) {
-        Optional<ExperimentData> experimentData = experimentDataService.getExperimentDataById(id);
-        return experimentData.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    @GetMapping("/reaction-times/{experimentSettingsId}")
+    public ResponseEntity<?> getReactionTimesByExperimentDataId(@PathVariable Long experimentDataId) {
+        try {
+            Optional<ExperimentData> experimentData = experimentDataService.getExperimentDataById(experimentDataId);
+
+            if (experimentData.isPresent()) {
+                List<ReactionTimes> reactionTimes = experimentData.get().getReactionTimes();
+                return new ResponseEntity<>(reactionTimes, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("ExperimentData not found", HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-
-
-
 
 
 
@@ -90,13 +104,13 @@ public class ExperimentDataController {
             // Extract average reaction times from the request data
             Map<String, Double> averageReactionTimes = (Map<String, Double>) requestData.get("averageReactionTimes");
 
-            if (averageReactionTimes == null || !averageReactionTimes.containsKey("positive") || !averageReactionTimes.containsKey("negative")) {
+            if (averageReactionTimes == null || !averageReactionTimes.containsKey("correct") || !averageReactionTimes.containsKey("incorrect")) {
                 return new ResponseEntity<>("Invalid request data: 'averageReactionTimes' is missing required fields", HttpStatus.BAD_REQUEST);
             }
 
             AverageReactionTimes avgReactionTime = new AverageReactionTimes();
-            avgReactionTime.setNegative(((Number) averageReactionTimes.get("positive")).doubleValue());
-            avgReactionTime.setNegative(((Number) averageReactionTimes.get("negative")).doubleValue());
+            avgReactionTime.setCorrect(((Number) averageReactionTimes.get("correct")).doubleValue());
+            avgReactionTime.setIncorrect(((Number) averageReactionTimes.get("incorrect")).doubleValue());
             experimentData.setAverageReactionTimes(avgReactionTime);
 
             ExperimentData newExperimentData = experimentDataService.saveExperimentData(experimentData);
@@ -132,4 +146,61 @@ public class ExperimentDataController {
         experimentDataService.deleteExperimentData(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
+
+
+    @GetMapping("/average-reaction-times/{experimentDataId}")
+    public ResponseEntity<?> getAverageReactionTimesByExperimentDataId(@PathVariable Long experimentDataId) {
+        try {
+            Optional<ExperimentData> experimentData = experimentDataService.getExperimentDataById(experimentDataId);
+
+            if (experimentData.isPresent()) {
+                AverageReactionTimes avgReactionTimes = experimentData.get().getAverageReactionTimes();
+                if (avgReactionTimes != null) {
+                    return ResponseEntity.ok(avgReactionTimes);
+                } else {
+                    return ResponseEntity.status(HttpStatus.NO_CONTENT).body("AverageReactionTimes not available");
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ExperimentData not found");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+        }
+    }
+
+
+    @GetMapping("/experiment-details/{experimentDataId}")
+    public ResponseEntity<?> getExperimentDetailsById(@PathVariable Long experimentDataId) {
+        try {
+            Optional<ExperimentData> experimentDataOptional = experimentDataService.getExperimentDataById(experimentDataId);
+
+            if (experimentDataOptional.isPresent()) {
+                ExperimentData experimentData = experimentDataOptional.get();
+
+               
+
+                // Create DTO
+                ExperimentDetailsDTO experimentDetails = new ExperimentDetailsDTO();
+                experimentDetails.setPatient(experimentData.getExperimentSettings().getPatient());
+                experimentDetails.setExperimentSettings(experimentData.getExperimentSettings());
+                experimentDetails.setReactionTimes(experimentData.getReactionTimes());
+                experimentDetails.setAverageReactionTimes(experimentData.getAverageReactionTimes());
+
+                return ResponseEntity.ok(experimentDetails);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("ExperimentData not found");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+        }
+    }
+
+
+
+
+
 }

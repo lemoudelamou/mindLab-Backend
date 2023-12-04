@@ -1,6 +1,8 @@
 package com.example.mindLab.services;
 
-import com.example.mindLab.models.Patient;
+import com.example.mindLab.models.*;
+import com.example.mindLab.repositories.ExperimentDataRepository;
+import com.example.mindLab.repositories.ExperimentSettingsRepository;
 import com.example.mindLab.repositories.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,8 +16,9 @@ public class PatientService {
     private final PatientRepository patientRepository;
 
     @Autowired
-    public PatientService(PatientRepository patientRepository) {
+    public PatientService(PatientRepository patientRepository, ExperimentSettingsRepository experimentSettingsRepository, ExperimentDataRepository experimentDataRepository) {
         this.patientRepository = patientRepository;
+
     }
 
     public List<Patient> getAllPatients() {
@@ -33,4 +36,8 @@ public class PatientService {
     public void deletePatient(Long id) {
         patientRepository.deleteById(id);
     }
+
+
+
+
 }
