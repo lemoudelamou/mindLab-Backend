@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/patient/")  // Update the request mapping to include the patientId variable
+@RequestMapping("/api/settings/")  // Update the request mapping to include the patientId variable
 public class ExperimentSettingsController {
 
     private final ExperimentSettingsService experimentSettingsService;
@@ -36,14 +36,14 @@ public class ExperimentSettingsController {
         return new ResponseEntity<>(experimentSettingsList, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/patient/{id}")
     public ResponseEntity<ExperimentSettings> getExperimentSettingsById(@PathVariable Long id) {
         Optional<ExperimentSettings> experimentSettings = experimentSettingsService.getExperimentSettingsById(id);
         return experimentSettings.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("/settings/{patientId}")
+    @PostMapping("/save/{patientId}")
     public ResponseEntity<ExperimentSettings> addExperimentSettings(
             @PathVariable Long patientId,  // Include the patientId variable in the path
             @RequestBody ExperimentSettings experimentSettings) {

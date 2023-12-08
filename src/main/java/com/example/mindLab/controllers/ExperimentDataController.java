@@ -178,16 +178,7 @@ public class ExperimentDataController {
             Optional<ExperimentData> experimentDataOptional = experimentDataService.getExperimentDataById(experimentDataId);
 
             if (experimentDataOptional.isPresent()) {
-                ExperimentData experimentData = experimentDataOptional.get();
-
-               
-
-                // Create DTO
-                ExperimentDetailsDTO experimentDetails = new ExperimentDetailsDTO();
-                experimentDetails.setPatient(experimentData.getExperimentSettings().getPatient());
-                experimentDetails.setExperimentSettings(experimentData.getExperimentSettings());
-                experimentDetails.setReactionTimes(experimentData.getReactionTimes());
-                experimentDetails.setAverageReactionTimes(experimentData.getAverageReactionTimes());
+                ExperimentDetailsDTO experimentDetails = getExperimentDetailsDTO(experimentDataOptional);
 
                 return ResponseEntity.ok(experimentDetails);
             } else {
@@ -199,8 +190,18 @@ public class ExperimentDataController {
         }
     }
 
+    private static ExperimentDetailsDTO getExperimentDetailsDTO(Optional<ExperimentData> experimentDataOptional) {
+        ExperimentData experimentData = experimentDataOptional.get();
 
 
+        // Create DTO
+        ExperimentDetailsDTO experimentDetails = new ExperimentDetailsDTO();
+        experimentDetails.setPatient(experimentData.getExperimentSettings().getPatient());
+        experimentDetails.setExperimentSettings(experimentData.getExperimentSettings());
+        experimentDetails.setReactionTimes(experimentData.getReactionTimes());
+        experimentDetails.setAverageReactionTimes(experimentData.getAverageReactionTimes());
+        return experimentDetails;
+    }
 
 
 }
