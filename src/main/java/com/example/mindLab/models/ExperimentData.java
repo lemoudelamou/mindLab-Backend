@@ -31,6 +31,11 @@ public class ExperimentData implements Serializable {
     @JsonIgnore
     private ExperimentSettings experimentSettings;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
+
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "experimentData", orphanRemoval = true)
     @JsonIgnore
     private AverageReactionTimes averageReactionTime;

@@ -31,6 +31,8 @@ public class Patient implements Serializable {
     private String diseases;
     @Column(nullable = false, updatable = false)
     private LocalDate expDate;
+    @Column(name = "groupe")
+    private String groupe;
 
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)

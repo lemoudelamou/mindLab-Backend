@@ -12,4 +12,9 @@ public interface ExperimentDataRepository extends JpaRepository<ExperimentData, 
     // You can add custom query methods if needed
 
 
+    @Query("SELECT ed FROM ExperimentData ed " +
+            "JOIN ed.experimentSettings es " +
+            "JOIN es.patient p " +
+            "WHERE p.groupe = :group")
+    List<ExperimentData> findByGroupe(@Param("group") String group);
 }

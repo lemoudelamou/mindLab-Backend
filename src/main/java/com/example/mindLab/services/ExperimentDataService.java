@@ -42,5 +42,10 @@ public class ExperimentDataService {
     }
 
 
+    public List<ExperimentData> getExperimentDataByGroup(String groupe) {
+        return experimentDataRepository.findByGroupe(groupe);
+    }
+
+
 
 }

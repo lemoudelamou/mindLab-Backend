@@ -203,5 +203,22 @@ public class ExperimentDataController {
         return experimentDetails;
     }
 
+    @GetMapping("/group/{groupe}")
+    public ResponseEntity<List<ExperimentData>> getExperimentDataByGroup(@PathVariable String groupe) {
+        try {
+            List<ExperimentData> experimentDataList = experimentDataService.getExperimentDataByGroup(groupe);
+
+            if (experimentDataList.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(experimentDataList, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
 
 }
