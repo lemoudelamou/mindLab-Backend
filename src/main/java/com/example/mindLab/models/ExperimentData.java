@@ -22,19 +22,15 @@ public class ExperimentData implements Serializable {
     @Column(nullable = false)
     private Long id;
 
+    private String experimentId;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "experiment_data_id")
     private List<ReactionTimes> reactionTimes;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "experiment_settings_id", nullable = false)
-    @JsonIgnore
-    private ExperimentSettings experimentSettings;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id")
-    private Patient patient;
+
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "experimentData", orphanRemoval = true)
     @JsonIgnore
@@ -58,6 +54,22 @@ public class ExperimentData implements Serializable {
     }
 
 
+    public String getExperimentId() {
+        return experimentId;
+    }
 
+    public void setExperimentId(String experimentId) {
+        this.experimentId = experimentId;
+    }
+
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+    @JoinColumn(name = "experiment_settings_id", nullable = false)
+    @JsonIgnore
+    private ExperimentSettings experimentSettings;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 
 }

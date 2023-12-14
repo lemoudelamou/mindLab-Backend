@@ -39,6 +39,9 @@ public class Patient implements Serializable {
     @JsonIgnore
     private List<ExperimentSettings> experimentSettingsList;
 
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<ExperimentData> experimentDataList;
 
     @PrePersist
     public void prePersist() {

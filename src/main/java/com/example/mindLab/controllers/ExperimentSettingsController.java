@@ -65,21 +65,36 @@ public class ExperimentSettingsController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<ExperimentSettings> updateExperimentSettings(
-            @PathVariable Long patientId,
             @PathVariable Long id,
             @RequestBody ExperimentSettings updatedExperimentSettings) {
         Optional<ExperimentSettings> existingExperimentSettings = experimentSettingsService.getExperimentSettingsById(id);
 
         if (existingExperimentSettings.isPresent()) {
-            updatedExperimentSettings.setId(id);
-            ExperimentSettings savedExperimentSettings = experimentSettingsService.saveExperimentSettings(updatedExperimentSettings);
+            // Retrieve the existing ExperimentSettings
+            ExperimentSettings existingSettings = existingExperimentSettings.get();
+
+            // Update only the fields you want to modify
+            existingSettings.setExperiment(updatedExperimentSettings.getExperiment());
+            existingSettings.setShape(updatedExperimentSettings.getShape());
+            existingSettings.setExperimentLength(updatedExperimentSettings.getExperimentLength());
+            existingSettings.setBlinkDelay(updatedExperimentSettings.getBlinkDelay());
+            existingSettings.setIsColorBlind(updatedExperimentSettings.getIsColorBlind());
+            existingSettings.setDifficultyLevel(updatedExperimentSettings.getDifficultyLevel());
+            existingSettings.setColor1(updatedExperimentSettings.getColor1());
+            existingSettings.setColor2(updatedExperimentSettings.getColor2());
+            existingSettings.setColor3(updatedExperimentSettings.getColor3());
+
+            // Save the updated ExperimentSettings
+            ExperimentSettings savedExperimentSettings = experimentSettingsService.saveExperimentSettings(existingSettings);
+
             return new ResponseEntity<>(savedExperimentSettings, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExperimentSettings(@PathVariable Long id) {

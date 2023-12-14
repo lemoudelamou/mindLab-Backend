@@ -5,6 +5,7 @@ import com.example.mindLab.models.*;
 import com.example.mindLab.repositories.PatientRepository;
 import com.example.mindLab.services.ExperimentDataService;
 import com.example.mindLab.services.ExperimentSettingsService;
+import com.example.mindLab.services.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,9 @@ public class ExperimentDataController {
     private final ExperimentDataService experimentDataService;
 
     private final ExperimentSettingsService experimentSettingsService;
+
+    @Autowired
+    private PatientService patientService;
 
 
     public ExperimentSettings getExperimentSettingsById(Long experimentSettingsId) {
@@ -59,12 +63,38 @@ public class ExperimentDataController {
         }
     }
 
+    @GetMapping("/reaction-times-by-patient/{patientId}")
+    public ResponseEntity<?> getReactionTimesByPatientId(@PathVariable Long patientId) {
+        try {
+            // Assuming there's a method like getExperimentDataByPatientId in your service
+            List<ExperimentData> experimentDataList = experimentDataService.getExperimentDataByPatientId(patientId);
+
+            if (!experimentDataList.isEmpty()) {
+                // Combine reaction times from all experiment data associated with the patient
+                List<ReactionTimes> reactionTimes = new ArrayList<>();
+                for (ExperimentData experimentData : experimentDataList) {
+                    reactionTimes.addAll(experimentData.getReactionTimes());
+                }
+
+                return new ResponseEntity<>(reactionTimes, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("No experiment data found for the given patient", HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
-    @PostMapping("/{settingsId}/results")
+
+
+    @PostMapping("/patient/{patientId}/{settingsId}/results/{experimentId}")
     public ResponseEntity<?> addExperimentDataWithSettings(
             @RequestBody Map<String, Object> requestData,
-            @PathVariable Long settingsId
+            @PathVariable Long settingsId,
+            @PathVariable Long patientId,
+            @PathVariable String experimentId
     ) {
         try {
             // Check if the required fields are present in the request data
@@ -78,11 +108,23 @@ public class ExperimentDataController {
                 return new ResponseEntity<>("ExperimentSettings not found", HttpStatus.NOT_FOUND);
             }
 
+            // Retrieve the patient by ID
+            Optional<Patient> patientOptional = patientService.getPatientById(patientId);
+
+            if (patientOptional.isEmpty()) {
+                return new ResponseEntity<>("Patient not found", HttpStatus.NOT_FOUND);
+            }
+
+            Patient patient = patientOptional.get(); // Extract the patient from Optional
+
             ExperimentData experimentData = new ExperimentData();
             experimentData.setExperimentSettings(experimentSettings);
+            experimentData.setPatient(patient); // Set the patient for the experimentData
+            experimentData.setExperimentId(experimentId); // Set the experimentId
 
             // Extract reaction times from the request data
-            List<Map<String, Object>> reactionTimesList = (List<Map<String, Object>>) requestData.get("reactionTimes");
+            Map<String, List<Map<String, Object>>> reactionTimesMap = (Map<String, List<Map<String, Object>>>) requestData.get("reactionTimes");
+            List<Map<String, Object>> reactionTimesList = reactionTimesMap.get(experimentId);
 
             if (reactionTimesList == null) {
                 return new ResponseEntity<>("Invalid request data: 'reactionTimes' is missing", HttpStatus.BAD_REQUEST);
@@ -111,6 +153,7 @@ public class ExperimentDataController {
             AverageReactionTimes avgReactionTime = new AverageReactionTimes();
             avgReactionTime.setCorrect(((Number) averageReactionTimes.get("correct")).doubleValue());
             avgReactionTime.setIncorrect(((Number) averageReactionTimes.get("incorrect")).doubleValue());
+
             experimentData.setAverageReactionTimes(avgReactionTime);
 
             ExperimentData newExperimentData = experimentDataService.saveExperimentData(experimentData);
@@ -122,7 +165,6 @@ public class ExperimentDataController {
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 
     @PutMapping("/{id}")
@@ -141,10 +183,16 @@ public class ExperimentDataController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteExperimentData(@PathVariable Long id) {
-        experimentDataService.deleteExperimentData(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        Optional<ExperimentData> existingExperimentData = experimentDataService.getExperimentDataById(id);
+
+        if (existingExperimentData.isPresent()) {
+            experimentDataService.deleteExperimentData(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
 
@@ -218,6 +266,73 @@ public class ExperimentDataController {
         }
     }
 
+
+    @GetMapping("/gender/{gender}")
+    public ResponseEntity<List<ExperimentData>> getExperimentDataByPatientGender(@PathVariable(required = false) String gender) {
+        try {
+            List<ExperimentData> experimentDataList;
+
+            if (gender != null && !gender.equalsIgnoreCase("all")) {
+                // Specific gender provided
+                experimentDataList = experimentDataService.getExperimentDataByPatientGender(gender);
+            } else {
+                // No specific gender provided or "All" provided, fetch data for all genders
+                experimentDataList = experimentDataService.getAllExperimentData();
+            }
+
+            if (experimentDataList.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+
+
+            return new ResponseEntity<>(experimentDataList, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/data/patient/{patientId}")
+    public ResponseEntity<?> getExperimentDataByPatientId(@PathVariable Long patientId) {
+        try {
+            List<ExperimentData> experimentDataList = experimentDataService.getExperimentDataByPatientId(patientId);
+
+            if (!experimentDataList.isEmpty()) {
+                // Map the data to the desired format
+                List<Map<String, Object>> responseDataList = new ArrayList<>();
+
+                for (ExperimentData experimentData : experimentDataList) {
+                    Map<String, Object> responseData = new HashMap<>();
+                    responseData.put("experimentDataId", experimentData.getId()); // Add experimentDataId
+                    responseData.put("experimentSettings", experimentData.getExperimentSettings());
+                    responseData.put("patientInfo", experimentData.getPatient());
+                    responseData.put("reactionTimes", experimentData.getReactionTimes());
+                    responseData.put("averageReactionTimes", experimentData.getAverageReactionTimes());
+                    responseDataList.add(responseData);
+                }
+
+                return ResponseEntity.ok(responseDataList);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error");
+        }
+    }
+
+
+
+    @DeleteMapping("/delete-reaction-times/{id}")
+    public ResponseEntity<String> deleteReactionTimesByExperimentId(@PathVariable String id) {
+        try {
+            experimentDataService.deleteDataByExperimentDataId(id);
+            return new ResponseEntity<>("Reaction times deleted successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error deleting reaction times: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
 

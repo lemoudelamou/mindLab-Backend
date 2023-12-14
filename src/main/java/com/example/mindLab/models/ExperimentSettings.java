@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,9 +31,12 @@ public class ExperimentSettings implements Serializable {
     private String color2;
     private String color3;
 
-    @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
-    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "patient_id")
     private Patient patient;
+
+
+    @OneToMany(mappedBy = "experimentSettings", cascade = CascadeType.ALL)
+    private List<ExperimentData> experimentDataList;
 
 }

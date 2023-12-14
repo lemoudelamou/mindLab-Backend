@@ -1,7 +1,9 @@
 package com.example.mindLab.repositories;
 
 import com.example.mindLab.models.*;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,8 +15,28 @@ public interface ExperimentDataRepository extends JpaRepository<ExperimentData, 
 
 
     @Query("SELECT ed FROM ExperimentData ed " +
-            "JOIN ed.experimentSettings es " +
-            "JOIN es.patient p " +
+            "JOIN ed.patient p " +
             "WHERE p.groupe = :group")
     List<ExperimentData> findByGroupe(@Param("group") String group);
+
+    @Query("SELECT ed FROM ExperimentData ed " +
+            "JOIN ed.experimentSettings es " +
+            "JOIN es.patient p " +
+            "WHERE p.gender = :gender")
+    List<ExperimentData> findByPatientGender(@Param("gender") String gender);
+
+    @Query("SELECT ed FROM ExperimentData ed " +
+            "JOIN ed.experimentSettings es " +
+            "JOIN es.patient p " +
+            "WHERE p.id = :id")
+    List<ExperimentData> findByPatientId(Long id);
+
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM ExperimentData e WHERE e.experimentId = :experimentId")
+    void deleteReactionTimesByExperimentId(@Param("experimentId") String experimentId);
+
+
+
 }
