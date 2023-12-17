@@ -29,9 +29,6 @@ public class ExperimentData implements Serializable {
     private List<ReactionTimes> reactionTimes;
 
 
-
-
-
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "experimentData", orphanRemoval = true)
     @JsonIgnore
     private AverageReactionTimes averageReactionTime;

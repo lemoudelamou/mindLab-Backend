@@ -22,6 +22,7 @@ public class Patient implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Long id;
+    @Column(name = "fullname")
     private String fullname;
     private LocalDate birthDate ;
     private String age ;

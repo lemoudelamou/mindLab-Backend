@@ -32,10 +32,13 @@ public interface ExperimentDataRepository extends JpaRepository<ExperimentData, 
     List<ExperimentData> findByPatientId(Long id);
 
 
-    @Transactional
-    @Modifying
-    @Query("DELETE FROM ExperimentData e WHERE e.experimentId = :experimentId")
-    void deleteReactionTimesByExperimentId(@Param("experimentId") String experimentId);
+    @Query("SELECT ed FROM ExperimentData ed " +
+            "JOIN ed.experimentSettings es " +
+            "JOIN es.patient p " +
+            "WHERE p.fullname = :fullname AND p.id = :patientId")
+    List<ExperimentData> findByPatientFullnameAndId(@Param("fullname") String fullname, @Param("patientId") Long patientId);
+
+
 
 
 

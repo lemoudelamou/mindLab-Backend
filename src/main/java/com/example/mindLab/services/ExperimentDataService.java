@@ -61,6 +61,13 @@ public class ExperimentDataService {
         return experimentDataList;
     }
 
+    public List<ExperimentData> getExperimentDataByPatientFullnameAndId(String fullname, Long patientId) {
+          List<ExperimentData> experimentDataList = experimentDataRepository.findByPatientFullnameAndId(fullname, patientId);
+
+        return experimentDataList;
+
+
+    }
 
 
 

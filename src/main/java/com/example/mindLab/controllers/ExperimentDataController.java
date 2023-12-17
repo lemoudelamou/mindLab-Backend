@@ -6,12 +6,19 @@ import com.example.mindLab.repositories.PatientRepository;
 import com.example.mindLab.services.ExperimentDataService;
 import com.example.mindLab.services.ExperimentSettingsService;
 import com.example.mindLab.services.PatientService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
+
+
 
 @RestController
 @RequestMapping("/api/data/")
@@ -20,6 +27,7 @@ public class ExperimentDataController {
     private final ExperimentDataService experimentDataService;
 
     private final ExperimentSettingsService experimentSettingsService;
+
 
     @Autowired
     private PatientService patientService;
@@ -165,6 +173,7 @@ public class ExperimentDataController {
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
     @PutMapping("/{id}")
@@ -316,6 +325,50 @@ public class ExperimentDataController {
             } else {
                 return ResponseEntity.notFound().build();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error");
+        }
+    }
+
+
+
+
+    @GetMapping("/by-patient-fullname/{fullname}/by-patient-id/{patientId}")
+    public ResponseEntity<?> getExperimentDataByPatientFullname(
+            @PathVariable(required = false) String fullname,
+            @PathVariable Long patientId) {
+        try {
+            // Decode the URL-encoded path variable
+            if (fullname != null) {
+                fullname = URLDecoder.decode(fullname, "UTF-8");
+                // Manually trim the fullname to remove leading and trailing whitespaces
+                fullname = fullname.trim();
+            }
+
+            List<ExperimentData> experimentDataList = experimentDataService.getExperimentDataByPatientFullnameAndId(fullname, patientId);
+
+            if (!experimentDataList.isEmpty()) {
+                // Map the data to the desired format
+                List<Map<String, Object>> responseDataList = new ArrayList<>();
+
+                for (ExperimentData experimentData : experimentDataList) {
+                    Map<String, Object> responseData = new HashMap<>();
+                    responseData.put("patient", experimentData.getPatient());
+                    responseData.put("experimentDataId", experimentData.getId()); // Add experimentDataId
+                    responseData.put("experimentSettings", experimentData.getExperimentSettings());
+                    responseData.put("reactionTimes", experimentData.getReactionTimes());
+                    responseData.put("averageReactionTimes", experimentData.getAverageReactionTimes());
+                    responseDataList.add(responseData);
+                }
+
+                return ResponseEntity.ok(responseDataList);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error decoding path variable");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error");
