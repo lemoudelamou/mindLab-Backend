@@ -23,6 +23,8 @@ public class ExperimentData implements Serializable {
     private Long id;
 
     private String experimentId;
+    private String startSession;
+    private String endSession;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "experiment_data_id")

@@ -106,9 +106,18 @@ public class ExperimentDataController {
     ) {
         try {
             // Check if the required fields are present in the request data
-            if (!requestData.containsKey("reactionTimes") || !requestData.containsKey("averageReactionTimes")) {
+            if (!requestData.containsKey("startSession") ||
+                    !requestData.containsKey("endSession") ||
+                    !requestData.containsKey("reactionTimes") ||
+                    !requestData.containsKey("averageReactionTimes")) {
                 return new ResponseEntity<>("Invalid request data", HttpStatus.BAD_REQUEST);
             }
+
+            // Extract startSession and endSession from the request data
+            String startSession = (String) requestData.get("startSession");
+            String endSession = (String) requestData.get("endSession");
+
+            // Validate or process startSession and endSession as needed
 
             ExperimentSettings experimentSettings = getExperimentSettingsById(settingsId);
 
@@ -129,6 +138,8 @@ public class ExperimentDataController {
             experimentData.setExperimentSettings(experimentSettings);
             experimentData.setPatient(patient); // Set the patient for the experimentData
             experimentData.setExperimentId(experimentId); // Set the experimentId
+            experimentData.setStartSession(startSession); // Set the startSession
+            experimentData.setEndSession(endSession); // Set the endSession
 
             // Extract reaction times from the request data
             Map<String, List<Map<String, Object>>> reactionTimesMap = (Map<String, List<Map<String, Object>>>) requestData.get("reactionTimes");
@@ -173,6 +184,7 @@ public class ExperimentDataController {
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
 
