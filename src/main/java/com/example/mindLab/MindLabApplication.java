@@ -17,8 +17,6 @@ public class MindLabApplication {
 		SpringApplication.run(MindLabApplication.class, args);
 	}
 
-
-
 	@Configuration
 	public class CorsConfig implements WebMvcConfigurer {
 

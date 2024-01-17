@@ -314,7 +314,7 @@ public class ExperimentDataController {
     }
 
 
-    @GetMapping("/data/patient/{patientId}")
+    @GetMapping("/patient/{patientId}")
     public ResponseEntity<?> getExperimentDataByPatientId(@PathVariable Long patientId) {
         try {
             List<ExperimentData> experimentDataList = experimentDataService.getExperimentDataByPatientId(patientId);
