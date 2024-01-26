@@ -28,6 +28,13 @@ public interface ExperimentDataRepository extends JpaRepository<ExperimentData, 
     @Query("SELECT ed FROM ExperimentData ed " +
             "JOIN ed.experimentSettings es " +
             "JOIN es.patient p " +
+            "WHERE p.groupe = :group AND p.user.id = :userId")
+    List<ExperimentData> findByPatientGroupAndUserId(@Param("group") String group, @Param("userId") Long userId);
+
+
+    @Query("SELECT ed FROM ExperimentData ed " +
+            "JOIN ed.experimentSettings es " +
+            "JOIN es.patient p " +
             "WHERE p.id = :id")
     List<ExperimentData> findByPatientId(Long id);
 
@@ -37,6 +44,7 @@ public interface ExperimentDataRepository extends JpaRepository<ExperimentData, 
             "JOIN es.patient p " +
             "WHERE p.fullname = :fullname AND p.id = :patientId")
     List<ExperimentData> findByPatientFullnameAndId(@Param("fullname") String fullname, @Param("patientId") Long patientId);
+
 
 
 

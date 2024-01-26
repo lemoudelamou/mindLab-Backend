@@ -44,6 +44,10 @@ public class Patient implements Serializable {
     @JsonIgnore
     private List<ExperimentData> experimentDataList;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @PrePersist
     public void prePersist() {
         // Set expDate to the current date when a new Patient is created

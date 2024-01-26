@@ -34,6 +34,11 @@ public class PatientController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/by-doctor/{userId}")
+    public List<Patient> getPatientsByDoctor(@PathVariable Long userId) {
+        return patientService.getAllPatientsForDoctor(userId);
+    }
+
     @PostMapping
     public ResponseEntity<Patient> addPatient(@RequestBody Patient patient) {
         Patient newPatient = patientService.savePatient(patient);

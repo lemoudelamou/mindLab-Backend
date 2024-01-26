@@ -400,5 +400,18 @@ public class ExperimentDataController {
     }
 
 
+    @GetMapping("/by-patient-group-user-id/{group}/{userId}")
+    public ResponseEntity<List<ExperimentData>> getExperimentDataByPatientGroupUserId(
+            @PathVariable String group,
+            @PathVariable String userId) {
+        try {
+            List<ExperimentData> experimentDataList = experimentDataService.getExperimentDataByPatientGroupUserId(group, userId);
+            return new ResponseEntity<>(experimentDataList, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
 }

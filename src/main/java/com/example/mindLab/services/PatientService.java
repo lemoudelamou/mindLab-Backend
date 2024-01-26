@@ -38,5 +38,10 @@ public class PatientService {
     }
 
 
+    public List<Patient> getAllPatientsForDoctor(Long userId) {
+        return patientRepository.findAllByUser_Id(userId);
+    }
+
+
 }
 

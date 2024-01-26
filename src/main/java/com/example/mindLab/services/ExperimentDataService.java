@@ -54,6 +54,10 @@ public class ExperimentDataService {
         return experimentDataRepository.findByPatientGender(gender);
     }
 
+    public List<ExperimentData> getExperimentDataByPatientGroupUserId(String group, String userId) {
+        return experimentDataRepository.findByPatientGroupAndUserId(group, Long.valueOf(userId));
+    }
+
     public List<ExperimentData> getExperimentDataByPatientId(Long patientId) {
         List<ExperimentData> experimentDataList = experimentDataRepository.findByPatientId(patientId);
 
